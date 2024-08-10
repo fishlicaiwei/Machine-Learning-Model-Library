@@ -1,0 +1,38 @@
+import random
+import torch
+
+def data_iter(batch_size,features,labels):
+    # 定义一个data inter函数 该函数把数据切割为batch_size的小批量数据
+    num_examples=len(features)
+    # features是一个张量 取其长度作为数量如25个元素 取25
+    indices=list(range(num_examples))
+    # 生成对每个样本的index，先生成一个range序列，再利用list函数，把range转换为列表。列表可以包含不同类型的数据。而array数组需要同类型、array储存和运算的效率更高。
+    # 需要调用numpy库进行运算. indices是列表的名字
+    random.shuffle(indices)
+    # 把样本的下标都打乱，使样本都是随机读取的 没有特定的顺序
+    
+    for i in range(0,num_examples,batch_size):
+        batch_indices=torch.tensor(
+            indices[i:min(i+batch_size,num_examples)])
+        # 将当前批次的列表索引转换为张量。数组的维度是二维及以下，张量可以是任意维度。数组多用于数据处理，是用的numpy库。张量更多的用于机器学习和深度学习，用TensorFlow
+        # 索引范围，是当前的i~范围，如果步长超过了最后一个，将取到最后一个。       
+        yield features[batch_indices],labels[batch_indices]
+        # batch_indices是一个张量，里面包含了本批次的序列范围。再带到原始数据集里面去提取他们的feature如x1，x2，x3，以及标签值如y
+        # yield用于逐步返回小批量的函数，每次yield被调用时，生成器函数都会返回当前批次的特征和标签，等待函数下一次调用时处理下一个批次
+        # yield每次生成之后都会暂停并保留状态，下一次调用时会从暂停的地方继续执行
+
+batch_size=10
+for x,y in data_iter(batch_size,features,labels):
+    print(x,'\n',y)
+# 如果这里加一个小break就是打断循环 只生成第一个小批量数据
+
+
+
+# Intuition：
+# 在整个训练集上算梯度太贵 可以随机采样b个样本来近似损失
+# 1/b*sum(loss(xi,yi,w))
+# b是批量大小，另一个重要的超参数，还有一个是学习率
+# 我的理解是 损失函数会有叠加效应 比如n个测量点肯定有累积误差，如果全部数据一起算就具有可比性。凭loss降低可以选择最合适的参数。但如果要分批量进行，如果不归一化，
+# 没有办法对损失函数进行比较从而选出最优的loss函数。point1：loss函数只是一个“中间变量”，目的是为了求出最合适的参数值
+# 关于b批量的取值。不能太小，每次计算量太小，就不适合并行来最大利用计算资源。也不能太大，内存消耗增加浪费计算，例如如果所有样本都是相同的
+
