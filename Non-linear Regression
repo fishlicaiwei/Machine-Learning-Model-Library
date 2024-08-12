@@ -37,6 +37,8 @@ X_new_poly=poly_features.fit_transform(X_new)
 y_new=lin_reg.predict(X_new_poly)
 plt.plot(X_new,y_new,'r--',label='prediction')
 plt.axis([-3,3,-5,10])
+plt.legend()
+
 plt.plot(X,y,'b.')
 plt.xlabel('X_1')
 plt.ylabel('y')
