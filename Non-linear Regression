@@ -1,0 +1,45 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+m = 100
+X = 6 * np.random.rand(m, 1) - 3
+y = 0.5 * X**2 + X + np.random.randn(m, 1)
+
+plt.plot(X,y,'b.')
+plt.xlabel('X_1')
+plt.ylabel('y')
+plt.axis([-3,3,-5,10])
+plt.show
+
+from sklearn.preprocessing import PolynomialFeatures
+poly_features=PolynomialFeatures(degree=2,include_bias=False)
+#PolynomialFeatures 是，sklearn.preprocessing 模块中的一个工具。作用是将输入的特征扩展成多项式。构建
+#非线性特征值。PolynomialFeatures(degree=2)可以生成2次幂项。interaction_only仅生成交叉项。include_bias偏置常数，在某些模型里作截距。
+
+X_poly = poly_features.fit_transform(X)
+#无论何时对相同输入数据执行fit.transform 得到的结果是一致的
+#在训练数据上执行fit后 使用transform来处理测试数据或新数据。生成的多项式将遵循同样的规则。
+
+X_poly[7]
+#现在有两个特征 一个是x，一个是x的平方项
+
+from sklearn.linear_model import LinearRegression
+lin_reg= LinearRegression()
+lin_reg.fit(X_poly,y)
+print (lin_reg.coef_)
+#这是模型中各个特征的回归系数（权重）,包含了每一项的系数，是一个数组
+print (lin_reg.intercept_)
+#这是截距项
+
+X_new=np.linspace(-3,3,100).reshape(100,1)
+#重新生成测试集数据 用曲线去预测 把曲线绘制出来
+X_new_poly=poly_features.fit_transform(X_new)
+y_new=lin_reg.predict(X_new_poly)
+plt.plot(X_new,y_new,'r--',label='prediction')
+plt.axis([-3,3,-5,10])
+plt.plot(X,y,'b.')
+plt.xlabel('X_1')
+plt.ylabel('y')
+plt.axis([-3,3,-5,10])
+
+plt.show()
